@@ -10,11 +10,16 @@ public:
     Word();
     Word(std::string t_word);
 
+    const my::List<int> &letters() const;
+    int weight() const;
+
     Word &resolution(Word &other) const;
 
     Word &operator=(const Word &other);
 
-    friend std::ostream &operator<<(std::ostream &os, Word &t_word);
+    bool operator<(const Word &other) const;
+
+    friend std::ostream &operator<<(std::ostream &os, const Word &t_word);
 
     bool empty();
 

@@ -48,19 +48,9 @@ void Sentence::read_file(const std::string &t_file_path)
 
             continue;
         }
-        m_words.push_back(Word(line));
+        m_words.insert_sort(Word(line));
 
     } while (!file.eof());
 
-    // my::Node<Word> *head;
-
-    // head = m_words.head();
-
-    // while (head)
-    // {
-    //     std::cout << head->value() << std::endl;
-    //     head = head->next();
-    // }
-
-    // std::cout << m_words << std::endl;
+    std::cout << m_words << std::endl;
 }

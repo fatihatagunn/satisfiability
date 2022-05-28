@@ -5,11 +5,11 @@
 namespace my
 {
 
-    template <class T>
-    class List;
+    // template <class T>
+    // class List;
 
-    template <class T>
-    std::ostream &operator<<(std::ostream &os, const my::List<T> &t_list);
+    // template <class T>
+    // std::ostream &operator<<(std::ostream &os, const my::List<T> &t_list);
 
     template <class T>
     class List
@@ -21,6 +21,7 @@ namespace my
 
         my::Node<T> *head() const;
 
+        void insert_sort(T t_value);
         void insert_sort_u(T t_value);
         void insert_abs_sort_u(T t_value);
 
@@ -33,7 +34,18 @@ namespace my
         void erase(T t_value);
         void erase(my::Node<T> *t_node);
 
-        friend std::ostream &operator<<<T>(std::ostream &os, const List<T> &t_list);
+        friend std::ostream &operator<<(std::ostream &os, const List<T> &t_list)
+        {
+            my::Node<T> *head = t_list.head();
+
+            while (head)
+            {
+                os << head->value() << " ";
+                head = head->next();
+            }
+
+            return os;
+        }
 
         bool empty();
 

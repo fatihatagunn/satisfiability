@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "list.h"
 
 template <class T>
@@ -17,6 +15,35 @@ template <class T>
 my::Node<T> *my::List<T>::head() const
 {
     return m_head;
+}
+
+template <class T>
+void my::List<T>::insert_sort(T t_value)
+{
+    my::Node<T> *head = m_head;
+    my::Node<T> *prev = nullptr;
+
+    while (head)
+    {
+        if (head->value() < t_value)
+        {
+            prev = head;
+            head = head->next();
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    if (prev != nullptr)
+    {
+        prev->set_next(create_node(t_value, head));
+    }
+    else
+    {
+        m_head = create_node(t_value, head);
+    }
 }
 
 template <class T>
@@ -191,19 +218,19 @@ void my::List<T>::erase(my::Node<T> *t_node)
     }
 }
 
-template <class T>
-std::ostream &operator<<(std::ostream &os, my::List<T> &t_list)
-{
-    my::Node<T> *head = t_list.head();
+// template <class T>
+// std::ostream &operator<<(std::ostream &os, const my::List<T> &t_list)
+// {
+//     my::Node<T> *head = t_list.head();
 
-    while (head)
-    {
-        os << head->value() << " ";
-        head = head->next();
-    }
+//     while (head)
+//     {
+//         os << head->value() << " ";
+//         head = head->next();
+//     }
 
-    return os;
-}
+//     return os;
+// }
 
 template <class T>
 bool my::List<T>::empty()

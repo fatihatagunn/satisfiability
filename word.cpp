@@ -29,6 +29,16 @@ Word::Word(std::string t_word)
     }
 }
 
+const my::List<int> &Word::letters() const
+{
+    return m_letters;
+}
+
+int Word::weight() const
+{
+    return m_weight;
+}
+
 Word &Word::resolution(Word &other) const
 {
     size_t opposite_count = 0;
@@ -76,7 +86,7 @@ Word &Word::resolution(Word &other) const
             if (head_o->value() != value_o)
             {
                 n_word->m_letters.insert_abs_sort_u(head_o->value());
-                n_word->m_weight += abs(head_m->value());
+                n_word->m_weight += abs(head_o->value());
             }
             head_o = head_o->next();
         }
@@ -105,9 +115,14 @@ Word &Word::operator=(const Word &other)
     return *this;
 }
 
-std::ostream &operator<<(std::ostream &os, Word &t_word)
+bool Word::operator<(const Word &other) const
 {
-    os << t_word.m_letters << "W: " << t_word.m_weight << std::endl;
+    return m_weight < other.m_weight;
+}
+
+std::ostream &operator<<(std::ostream &os, const Word &t_word)
+{
+    os << t_word.letters() << "W: " << t_word.weight() << std::endl;
     return os;
 }
 
