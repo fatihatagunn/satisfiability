@@ -1,7 +1,7 @@
 #include "node.h"
 
 template <class T>
-my::Node<T>::Node(T t_value, Node<T> *t_next)
+my::Node<T>::Node(const T &t_value, Node<T> *t_next)
     : m_value(t_value), m_next(t_next)
 {
 }

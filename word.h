@@ -13,9 +13,7 @@ public:
     const my::List<int> &letters() const;
     int weight() const;
 
-    Word &resolution(Word &other) const;
-
-    Word &operator=(const Word &other);
+    Word resolution(const Word &other) const;
 
     bool operator<(const Word &other) const;
 

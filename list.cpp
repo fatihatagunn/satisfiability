@@ -18,7 +18,7 @@ my::Node<T> *my::List<T>::head() const
 }
 
 template <class T>
-void my::List<T>::insert_sort(T t_value)
+T my::List<T>::insert_sort(const T &t_value)
 {
     my::Node<T> *head = m_head;
     my::Node<T> *prev = nullptr;
@@ -44,10 +44,12 @@ void my::List<T>::insert_sort(T t_value)
     {
         m_head = create_node(t_value, head);
     }
+
+    return t_value;
 }
 
 template <class T>
-void my::List<T>::insert_sort_u(T t_value)
+T my::List<T>::insert_sort_u(const T &t_value)
 {
     my::Node<T> *head = m_head;
     my::Node<T> *prev = nullptr;
@@ -61,7 +63,7 @@ void my::List<T>::insert_sort_u(T t_value)
         }
         else if (head->value() == t_value)
         {
-            return;
+            return 0;
         }
         else
         {
@@ -77,10 +79,12 @@ void my::List<T>::insert_sort_u(T t_value)
     {
         m_head = create_node(t_value, head);
     }
+
+    return t_value;
 }
 
 template <class T>
-void my::List<T>::insert_abs_sort_u(T t_value)
+T my::List<T>::insert_abs_sort_u(const T &t_value)
 {
     my::Node<T> *head = m_head;
     my::Node<T> *prev = nullptr;
@@ -98,7 +102,7 @@ void my::List<T>::insert_abs_sort_u(T t_value)
         }
         else if (abs_head_value == abs_value)
         {
-            return;
+            return 0;
         }
         else
         {
@@ -114,23 +118,26 @@ void my::List<T>::insert_abs_sort_u(T t_value)
     {
         m_head = create_node(t_value, head);
     }
+
+    return t_value;
 }
 
 template <class T>
-void my::List<T>::push_front(T t_value)
+T my::List<T>::push_front(const T &t_value)
 {
     m_head = create_node(t_value, m_head);
+    return t_value;
 }
 
 template <class T>
-void my::List<T>::push_back(T t_value)
+T my::List<T>::push_back(const T &t_value)
 {
     my::Node<T> *head = m_head;
 
     if (!head)
     {
         m_head = create_node(t_value);
-        return;
+        return t_value;
     }
 
     while (head->next())
@@ -139,6 +146,8 @@ void my::List<T>::push_back(T t_value)
     }
 
     head->set_next(create_node(t_value));
+
+    return t_value;
 }
 
 template <class T>
@@ -205,7 +214,14 @@ void my::List<T>::erase(my::Node<T> *t_node)
     {
         if (head == t_node)
         {
-            prev->set_next(head->next());
+            if (prev == nullptr)
+            {
+                m_head = head->next();
+            }
+            else
+            {
+                prev->set_next(head->next());
+            }
 
             head->set_next(nullptr);
 
@@ -216,6 +232,25 @@ void my::List<T>::erase(my::Node<T> *t_node)
         prev = head;
         head = head->next();
     }
+}
+
+template <class T>
+void my::List<T>::print(std::ostream &os, char t_end) const
+{
+    my::Node<T> *head = m_head;
+
+    if (head == nullptr)
+    {
+        return;
+    }
+
+    while (head->next())
+    {
+        os << head->value() << t_end;
+        head = head->next();
+    }
+
+    os << head->value();
 }
 
 // template <class T>
@@ -239,7 +274,7 @@ bool my::List<T>::empty()
 }
 
 template <class T>
-my::Node<T> *my::List<T>::create_node(T t_value, my::Node<T> *t_next)
+my::Node<T> *my::List<T>::create_node(const T &t_value, my::Node<T> *t_next)
 {
     return new my::Node<T>(t_value, t_next);
 }

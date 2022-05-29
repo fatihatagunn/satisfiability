@@ -39,7 +39,7 @@ int Word::weight() const
     return m_weight;
 }
 
-Word &Word::resolution(Word &other) const
+Word Word::resolution(const Word &other) const
 {
     size_t opposite_count = 0;
 
@@ -64,7 +64,7 @@ Word &Word::resolution(Word &other) const
         head_m = head_m->next();
     }
 
-    Word *n_word = new Word();
+    Word n_word;
 
     if (opposite_count == 1)
     {
@@ -75,8 +75,7 @@ Word &Word::resolution(Word &other) const
         {
             if (head_m->value() != value_m)
             {
-                n_word->m_letters.insert_abs_sort_u(head_m->value());
-                n_word->m_weight += abs(head_m->value());
+                n_word.m_weight += abs(n_word.m_letters.insert_abs_sort_u(head_m->value()));
             }
             head_m = head_m->next();
         }
@@ -85,34 +84,13 @@ Word &Word::resolution(Word &other) const
         {
             if (head_o->value() != value_o)
             {
-                n_word->m_letters.insert_abs_sort_u(head_o->value());
-                n_word->m_weight += abs(head_o->value());
+                n_word.m_weight += abs(n_word.m_letters.insert_abs_sort_u(head_o->value()));
             }
             head_o = head_o->next();
         }
     }
 
-    return *n_word;
-}
-
-Word &Word::operator=(const Word &other)
-{
-    my::Node<int> *head = other.m_letters.head();
-
-    while (!m_letters.empty())
-    {
-        m_letters.pop_front();
-    }
-
-    while (head)
-    {
-        m_letters.push_back(head->value());
-        head = head->next();
-    }
-
-    m_weight = other.m_weight;
-
-    return *this;
+    return n_word;
 }
 
 bool Word::operator<(const Word &other) const
@@ -122,7 +100,7 @@ bool Word::operator<(const Word &other) const
 
 std::ostream &operator<<(std::ostream &os, const Word &t_word)
 {
-    os << t_word.letters() << "W: " << t_word.weight() << std::endl;
+    os << "(" << t_word.letters() << ")";
     return os;
 }
 

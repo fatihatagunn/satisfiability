@@ -10,9 +10,13 @@ public:
     Sentence();
     Sentence(std::string t_file_path);
 
+    const my::List<Word> &words() const;
+
     void resolution();
 
     void read_file(const std::string &t_file_path);
+
+    friend std::ostream &operator<<(std::ostream &os, const Sentence &t_sentence);
 
 private:
     my::List<Word> m_words;

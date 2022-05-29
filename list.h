@@ -21,12 +21,12 @@ namespace my
 
         my::Node<T> *head() const;
 
-        void insert_sort(T t_value);
-        void insert_sort_u(T t_value);
-        void insert_abs_sort_u(T t_value);
+        T insert_sort(const T &t_value);
+        T insert_sort_u(const T &t_value);
+        T insert_abs_sort_u(const T &t_value);
 
-        void push_front(T t_value);
-        void push_back(T t_value);
+        T push_front(const T &t_value);
+        T push_back(const T &t_value);
 
         void pop_front();
         void pop_back();
@@ -34,23 +34,30 @@ namespace my
         void erase(T t_value);
         void erase(my::Node<T> *t_node);
 
+        void print(std::ostream &os, char t_end = ' ') const;
+
         friend std::ostream &operator<<(std::ostream &os, const List<T> &t_list)
         {
             my::Node<T> *head = t_list.head();
 
-            while (head)
+            if (head == nullptr)
             {
-                os << head->value() << " ";
+                return os;
+            }
+
+            while (head->next())
+            {
+                os << head->value() << ' ';
                 head = head->next();
             }
 
-            return os;
+            return os << head->value();
         }
 
         bool empty();
 
     protected:
-        my::Node<T> *create_node(T t_value, my::Node<T> *t_next = nullptr);
+        my::Node<T> *create_node(const T &t_value, my::Node<T> *t_next = nullptr);
 
     private:
         my::Node<T> *m_head{nullptr};

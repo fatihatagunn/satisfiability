@@ -4,7 +4,7 @@ namespace my
     class Node
     {
     public:
-        Node(T t_value = 0, Node<T> *t_next = nullptr);
+        Node(const T &t_value = 0, Node<T> *t_next = nullptr);
 
         ~Node();
 
