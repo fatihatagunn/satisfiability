@@ -1,17 +1,28 @@
 #include <iostream>
+#include <cmath>
 
 #include "sentence.cpp"
 
 int main()
 {
-    Sentence sentence1("/home/fatih/Projects/satisfiability/dimacs/pr1.txt");
-    Sentence sentence2("/home/fatih/Projects/satisfiability/dimacs/pr2.txt");
+    std::string project_path = "/home/fatih/Projects/satisfiability/";
+    std::string file_name = "pr" + std::to_string(7);
 
-    sentence1.resolution();
+    Sentence sentence(project_path + "dimacs/" + file_name + ".txt");
 
-    std::ofstream file{"words.txt"};
+    sentence.resolution();
 
-    file << sentence1 << std::endl;
+    std::ofstream file_res{project_path + "outputs/resolution_" + file_name + ".txt"};
 
-    file.close();
+    file_res << sentence << std::endl;
+
+    file_res.close();
+
+    std::ofstream file_dpll{project_path + "outputs/dpll_" + file_name + ".csv"};
+
+    sentence.dpll_brute_force(file_dpll, pow(2, 24));
+
+    std::cout << file_name << " is " << (sentence.is_sat() ? "SAT" : "UNSAT") << std::endl;
+
+    file_dpll.close();
 }

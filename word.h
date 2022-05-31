@@ -15,6 +15,8 @@ public:
 
     Word resolution(const Word &other) const;
 
+    uint8_t or_the_word(const uint8_t *t_logic_states) const;
+
     bool operator<(const Word &other) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Word &t_word);

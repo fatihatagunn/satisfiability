@@ -9,11 +9,23 @@ Sentence::Sentence(std::string t_file_path)
     : m_words()
 {
     read_file(t_file_path);
+    
+    m_logic_states = new uint8_t[m_letter_size];
+
+    for (size_t i = 0; i < m_letter_size; ++i)
+    {
+        m_logic_states[i] = 0;
+    }
 }
 
 const my::List<Word> &Sentence::words() const
 {
     return m_words;
+}
+
+size_t Sentence::letter_size() const
+{
+    return m_letter_size;
 }
 
 void Sentence::resolution()
@@ -39,10 +51,130 @@ void Sentence::resolution()
 
                 break;
             }
+            else if (!word.empty())
+            {
+                std::cout << "(" << head_f->value() << ") (" << head_s->value() << ") therefore the sentence is UNSAT." << std::endl;
+                return;
+            }
+
             head_s = head_s->next();
         }
         head_f = word.weight() != 0 ? m_words.head() : head_f->next();
     }
+}
+
+void Sentence::dpll_brute_force(std::ostream &os, size_t t_max_loop)
+{
+    remove_ineffective_letters();
+
+    size_t logic_count = pow(2, m_letter_size - m_ineffective_letter_size);
+
+    for (size_t i = 0; i < m_letter_size; ++i)
+    {
+        os << i + 1 << ";";
+    }
+    os << std::endl;
+
+    size_t i;
+
+    for (size_t i = 0; i < logic_count && i < t_max_loop; ++i)
+    {
+        my::Node<Word> *head = m_words.head();
+
+        while (head)
+        {
+            if (head->value().or_the_word(m_logic_states) == 0)
+            {
+                break;
+            }
+
+            head = head->next();
+        }
+
+        if (!head)
+        {
+            m_is_sat = true;
+            
+            for (size_t j = 0; j < m_letter_size; ++j)
+            {
+                os << (int)m_logic_states[j] << ";";
+            }
+            os << std::endl;
+        }
+
+        increment_logic_states();
+    }
+
+    if (i == t_max_loop && m_is_sat == false)
+    {
+        std::cout << "Maximum number of cycles reached!" << std::endl;
+    }
+}
+
+void Sentence::increment_logic_states()
+{
+    size_t i = m_letter_size - 1;
+
+    // for (size_t i = 0; i < m_letter_size; ++i)
+    // {
+    //     std::cout << (int) m_logic_states[i] << " ";
+    // }
+    // std::cout << " : " << std::endl;
+
+    while (true)
+    {
+        if (m_logic_states[i] == 0)
+        {
+            m_logic_states[i] = 1;
+            break;
+        }
+        else if (m_logic_states[i] == 1)
+        {
+            m_logic_states[i] = 0;
+            --i;
+        }
+        else
+        {
+            --i;
+        }
+    }
+}
+
+void Sentence::remove_ineffective_letters()
+{
+    for (size_t i = 0; i < m_letter_size; ++i)
+    {
+        m_logic_states[i] = 'x';
+    }
+
+    my::Node<Word> *head_sentence = m_words.head();
+
+    while (head_sentence)
+    {
+        my::Node<int> *head_letter = head_sentence->value().letters().head();
+
+        while (head_letter)
+        {
+            int i = abs(head_letter->value()) - 1;
+            m_logic_states[i] = 0;
+            head_letter = head_letter->next();
+        }
+        head_sentence = head_sentence->next();
+    }
+
+    for (size_t i = 0; i < m_letter_size; ++i)
+    {
+        if (m_logic_states[i] != 0)
+        {
+            m_logic_states[i] = 'x';
+            ++m_ineffective_letter_size;
+        }
+    }
+}
+
+bool Sentence::is_sat() const
+{
+    return m_is_sat;
 }
 
 void Sentence::read_file(const std::string &t_file_path)
@@ -68,14 +200,12 @@ void Sentence::read_file(const std::string &t_file_path)
         {
             char l_program;
             std::string cnf;
-            size_t letter_size;
-            size_t word_size;
 
-            std::istringstream(line) >> l_program >> cnf >> letter_size >> word_size;
+            std::istringstream(line) >> l_program >> cnf >> m_letter_size >> m_word_size;
 
             std::cout << l_program << " "
-                      << cnf << " " << letter_size << " "
-                      << word_size << std::endl;
+                      << cnf << " " << m_letter_size << " "
+                      << m_word_size << std::endl;
 
             continue;
         }

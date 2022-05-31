@@ -88,9 +88,39 @@ Word Word::resolution(const Word &other) const
             }
             head_o = head_o->next();
         }
+
+        if (n_word.m_weight == 0)
+        {
+            n_word.m_letters.push_front(0);
+        }
     }
 
     return n_word;
+}
+
+uint8_t Word::or_the_word(const uint8_t *t_logic_states) const
+{
+    my::Node<int> *head = m_letters.head();
+
+    while (head)
+    {
+        int i = abs(head->value()) - 1;
+        uint8_t state = t_logic_states[i];
+
+        if (head->value() < 0)
+        {
+            state = !state;
+        }
+
+        if (state)
+        {
+            return 1;
+        }
+
+        head = head->next();
+    }
+
+    return 0;
 }
 
 bool Word::operator<(const Word &other) const
