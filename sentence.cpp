@@ -9,7 +9,7 @@ Sentence::Sentence(std::string t_file_path)
     : m_words()
 {
     read_file(t_file_path);
-    
+
     m_logic_states = new uint8_t[m_letter_size];
 
     for (size_t i = 0; i < m_letter_size; ++i)
@@ -63,11 +63,20 @@ void Sentence::resolution()
     }
 }
 
-void Sentence::dpll_brute_force(std::ostream &os, size_t t_max_loop)
+void Sentence::dpll_serial(std::ostream &os, size_t t_max_letter)
 {
     remove_ineffective_letters();
 
-    size_t logic_count = pow(2, m_letter_size - m_ineffective_letter_size);
+    size_t max_loop;
+
+    if (m_letter_size - m_ineffective_letter_size < t_max_letter)
+    {
+        max_loop = pow(2, m_letter_size - m_ineffective_letter_size);
+    }
+    else
+    {
+        max_loop = pow(2, t_max_letter);
+    }
 
     for (size_t i = 0; i < m_letter_size; ++i)
     {
@@ -75,9 +84,7 @@ void Sentence::dpll_brute_force(std::ostream &os, size_t t_max_loop)
     }
     os << std::endl;
 
-    size_t i;
-
-    for (size_t i = 0; i < logic_count && i < t_max_loop; ++i)
+    for (size_t i = 0; i < max_loop; ++i)
     {
         my::Node<Word> *head = m_words.head();
 
@@ -94,48 +101,174 @@ void Sentence::dpll_brute_force(std::ostream &os, size_t t_max_loop)
         if (!head)
         {
             m_is_sat = true;
-            
+
             for (size_t j = 0; j < m_letter_size; ++j)
             {
                 os << (int)m_logic_states[j] << ";";
             }
             os << std::endl;
+
+            // return;
         }
 
-        increment_logic_states();
+        increment_reverse_logic_states(m_logic_states, m_letter_size);
     }
 
-    if (i == t_max_loop && m_is_sat == false)
+    if (m_is_sat == false)
     {
         std::cout << "Maximum number of cycles reached!" << std::endl;
     }
 }
 
-void Sentence::increment_logic_states()
+void Sentence::dpll_parallel(std::ostream &os, size_t t_max_letter, size_t t_thread_size)
 {
-    size_t i = m_letter_size - 1;
+    if (t_thread_size != 2 && t_thread_size != 4 && t_thread_size != 8 && t_thread_size != 16)
+    {
+        throw std::runtime_error("Error");
+    }
 
-    // for (size_t i = 0; i < m_letter_size; ++i)
+    remove_ineffective_letters();
+
+    for (size_t i = 0; i < m_letter_size; ++i)
+    {
+        os << i + 1 << ";";
+    }
+    os << std::endl;
+
+    size_t max_loop;
+
+    if (m_letter_size - m_ineffective_letter_size < t_max_letter)
+    {
+        max_loop = pow(2, m_letter_size - m_ineffective_letter_size);
+    }
+    else
+    {
+        max_loop = pow(2, t_max_letter);
+    }
+
+    max_loop /= t_thread_size;
+
+    uint8_t **thread_logic_states = new uint8_t *[t_thread_size];
+
+    for (size_t i = 0; i < t_thread_size; ++i)
+    {
+        thread_logic_states[i] = new uint8_t[m_letter_size];
+    }
+
+    for (size_t i = 0; i < m_letter_size; ++i)
+    {
+        thread_logic_states[0][i] = m_logic_states[i];
+    }
+
+    for (size_t i = 1; i < t_thread_size; ++i)
+    {
+        for (size_t j = 0; j < m_letter_size; ++j)
+        {
+            thread_logic_states[i][j] = thread_logic_states[i - 1][j];
+        }
+
+        for (size_t j = 0; j < max_loop; ++j)
+        {
+            increment_reverse_logic_states(thread_logic_states[i], m_letter_size);
+        }
+    }
+
+#pragma omp parallel num_threads(t_thread_size)
+    {
+        int t_id = omp_get_thread_num();
+        uint8_t *logic_states = thread_logic_states[t_id];
+
+        for (size_t i = 0; i < max_loop; ++i)
+        {
+            my::Node<Word> *head = m_words.head();
+
+            while (head)
+            {
+                if (head->value().or_the_word(logic_states) == 0)
+                {
+                    break;
+                }
+
+                head = head->next();
+            }
+
+            if (!head)
+            {
+#pragma omp critical
+                {
+                    m_is_sat = true;
+
+                    for (size_t j = 0; j < m_letter_size; ++j)
+                    {
+                        os << (int)logic_states[j] << ";";
+                    }
+                    os << std::endl;
+                }
+            }
+            increment_reverse_logic_states(logic_states, m_letter_size);
+        }
+    }
+
+    if (m_is_sat == false)
+    {
+        std::cout << "Maximum number of cycles reached!" << std::endl;
+    }
+}
+
+void Sentence::increment_logic_states(uint8_t *t_logic_states, size_t t_letter_size)
+{
+    size_t i = t_letter_size - 1;
+
+    // for (size_t i = 0; i < t_letter_size; ++i)
     // {
-    //     std::cout << (int) m_logic_states[i] << " ";
+    //     std::cout << (int) t_logic_states[i] << " ";
     // }
     // std::cout << " : " << std::endl;
 
     while (true)
     {
-        if (m_logic_states[i] == 0)
+        if (t_logic_states[i] == 0)
         {
-            m_logic_states[i] = 1;
+            t_logic_states[i] = 1;
             break;
         }
-        else if (m_logic_states[i] == 1)
+        else if (t_logic_states[i] == 1)
         {
-            m_logic_states[i] = 0;
+            t_logic_states[i] = 0;
             --i;
         }
         else
         {
             --i;
+        }
+    }
+}
+
+void Sentence::increment_reverse_logic_states(uint8_t *t_logic_states, size_t t_letter_size)
+{
+    size_t i = 0;
+
+    // for (size_t i = 0; i < t_letter_size; ++i)
+    // {
+    //     std::cout << (int) t_logic_states[i] << " ";
+    // }
+    // std::cout << " : " << std::endl;
+
+    while (true)
+    {
+        if (t_logic_states[i] == 0)
+        {
+            t_logic_states[i] = 1;
+            break;
+        }
+        else if (t_logic_states[i] == 1)
+        {
+            t_logic_states[i] = 0;
+            ++i;
+        }
+        else
+        {
+            ++i;
         }
     }
 }

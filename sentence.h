@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <omp.h>
 
 #include "word.cpp"
 
@@ -16,9 +17,11 @@ public:
 
     void resolution();
 
-    void dpll_brute_force(std::ostream &os, size_t t_max_loop);
+    void dpll_serial(std::ostream &os, size_t t_max_letter);
+    void dpll_parallel(std::ostream &os, size_t t_max_letter, size_t t_thread_size = 4);
 
-    void increment_logic_states();
+    static void increment_logic_states(uint8_t *t_logic_states, size_t t_letter_size);
+    static void increment_reverse_logic_states(uint8_t *t_logic_states, size_t t_letter_size);
 
     void remove_ineffective_letters();
 
